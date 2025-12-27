@@ -1,10 +1,12 @@
 import {
   ActionIcon,
   Box,
+  Center,
   Group,
   Skeleton,
   Stack,
   Table,
+  Text,
   TextInput,
 } from "@mantine/core";
 import { useClipboard } from "@mantine/hooks";
@@ -131,7 +133,19 @@ const FileList = memo(function FileList({
         <tbody>
           {isLoading
             ? skeletonRows
-            : files!.map((file) => (
+            : !files || files.length === 0
+              ? (
+                  <tr>
+                    <td colSpan={3}>
+                      <Center py="xl">
+                        <Text color="dimmed">
+                          <FormattedMessage id="share.table.empty" />
+                        </Text>
+                      </Center>
+                    </td>
+                  </tr>
+                )
+              : files.map((file) => (
                 <tr key={file.name}>
                   <td>{file.name}</td>
                   <td>{byteToHumanSizeString(parseInt(file.size))}</td>

@@ -1,4 +1,4 @@
-import { ActionIcon, Table } from "@mantine/core";
+import { ActionIcon, Center, Table, Text } from "@mantine/core";
 import { TbTrash } from "react-icons/tb";
 import { GrUndo } from "react-icons/gr";
 import { FileListItem } from "../../types/File.type";
@@ -102,6 +102,16 @@ const FileList = <T extends FileListItem = FileListItem>({
       onRestore={() => restore(i)}
     />
   ));
+
+  if (files.length === 0) {
+    return (
+      <Center py="xl">
+        <Text color="dimmed">
+          <FormattedMessage id="upload.filelist.empty" />
+        </Text>
+      </Center>
+    );
+  }
 
   return (
     <Table>

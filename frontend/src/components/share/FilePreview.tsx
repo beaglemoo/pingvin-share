@@ -1,6 +1,7 @@
 import {
   Button,
   Center,
+  Loader,
   Stack,
   Text,
   Title,
@@ -123,15 +124,25 @@ const ImagePreview = () => {
 };
 
 const TextPreview = () => {
-  const { shareId, fileId } = React.useContext(FilePreviewContext);
-  const [text, setText] = useState<string>("");
+  const { shareId, fileId, setIsNotSupported } =
+    React.useContext(FilePreviewContext);
+  const [text, setText] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { colorScheme } = useMantineTheme();
 
   useEffect(() => {
+    setIsLoading(true);
     api
       .get(`/shares/${shareId}/files/${fileId}?download=false`)
-      .then((res) => setText(res.data ?? "Preview couldn't be fetched."));
-  }, [shareId, fileId]);
+      .then((res) => {
+        setText(res.data ?? "");
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setIsNotSupported(true);
+        setIsLoading(false);
+      });
+  }, [shareId, fileId, setIsNotSupported]);
 
   const options: MarkdownToJSX.Options = {
     disableParsingRawHTML: true,
@@ -156,7 +167,15 @@ const TextPreview = () => {
     },
   };
 
-  return <Markdown options={options}>{text}</Markdown>;
+  if (isLoading) {
+    return (
+      <Center style={{ minHeight: 200 }}>
+        <Loader />
+      </Center>
+    );
+  }
+
+  return <Markdown options={options}>{text || ""}</Markdown>;
 };
 
 const PdfPreview = () => {

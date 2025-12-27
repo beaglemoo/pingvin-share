@@ -813,4 +813,10 @@ export default {
   "paste.action.download": "Download",
   "paste.action.raw": "View raw",
   "navbar.links.paste": "Paste",
+
+  // UI States
+  "share.table.empty": "No files in this share",
+  "upload.filelist.empty": "No files selected",
+  "share.error.download-failed": "Download failed. Please try again.",
+  "share.button.download-retry": "Retry Download",
 };
