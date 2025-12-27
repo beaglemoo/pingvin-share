@@ -73,7 +73,9 @@ export class S3FileService {
 
         const uploadId = multipartInitResponse.UploadId;
         if (!uploadId) {
-          throw new Error("Failed to initialize multipart upload.");
+          throw new InternalServerErrorException(
+            "Failed to initialize multipart upload.",
+          );
         }
 
         // Store the uploadId and parts list in memory
@@ -146,7 +148,9 @@ export class S3FileService {
         delete this.multipartUploads[file.id];
       }
       this.logger.error(error);
-      throw new Error("Multipart upload failed. The upload has been aborted.");
+      throw new InternalServerErrorException(
+        "Multipart upload failed. The upload has been aborted.",
+      );
     }
 
     const isLastChunk = chunk.index == chunk.total - 1;
@@ -213,7 +217,7 @@ export class S3FileService {
         }),
       );
     } catch (error) {
-      throw new Error("Could not delete file from S3");
+      throw new InternalServerErrorException("Could not delete file from S3");
     }
 
     await this.prisma.file.delete({ where: { id: fileId } });
@@ -233,7 +237,7 @@ export class S3FileService {
       );
 
       if (!listResponse.Contents || listResponse.Contents.length === 0) {
-        throw new Error(`No files found for share ${shareId}`);
+        throw new NotFoundException(`No files found for share ${shareId}`);
       }
 
       // Extract the keys of the files to be deleted
@@ -251,7 +255,9 @@ export class S3FileService {
         }),
       );
     } catch (error) {
-      throw new Error("Could not delete all files from S3");
+      throw new InternalServerErrorException(
+        "Could not delete all files from S3",
+      );
     }
   }
 
@@ -271,7 +277,7 @@ export class S3FileService {
       // Return ContentLength which is the file size in bytes
       return headObjectResponse.ContentLength ?? 0;
     } catch (error) {
-      throw new Error("Could not retrieve file size");
+      throw new InternalServerErrorException("Could not retrieve file size");
     }
   }
 
