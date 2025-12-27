@@ -265,8 +265,11 @@ export class AuthService {
           signOutFromProviderSupportedAndActivated = this.config.get(
             `oauth.${providerName}-signOut`,
           );
-        } catch (_) {
-          // Ignore error if the provider is not supported or if the provider sign out is not activated
+        } catch (error) {
+          // Provider sign-out config not found - this is expected for some providers
+          this.logger.verbose(
+            `Sign-out config not found for provider ${providerName}: ${error.message}`,
+          );
         }
         if (
           provider instanceof GenericOidcProvider &&
