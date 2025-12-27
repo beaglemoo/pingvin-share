@@ -4,6 +4,7 @@ import { ClamScanModule } from "src/clamscan/clamscan.module";
 import { EmailModule } from "src/email/email.module";
 import { FileModule } from "src/file/file.module";
 import { ReverseShareModule } from "src/reverseShare/reverseShare.module";
+import { LinkController } from "./link.controller";
 import { ShareController } from "./share.controller";
 import { ShareService } from "./share.service";
 
@@ -15,7 +16,7 @@ import { ShareService } from "./share.service";
     ReverseShareModule,
     forwardRef(() => FileModule),
   ],
-  controllers: [ShareController],
+  controllers: [ShareController, LinkController],
   providers: [ShareService],
   exports: [ShareService],
 })

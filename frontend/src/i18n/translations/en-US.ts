@@ -774,4 +774,16 @@ export default {
   "common.error.exact-length": "Must be exactly {length} characters",
   "common.error.invalid-number": "Must be a number",
   "common.error.field-required": "This field is required",
+
+  // LinkShare
+  "link.title": "Create Short Link",
+  "link.form.target-url": "Target URL",
+  "link.error.invalid-url": "Please enter a valid URL",
+  "link.button.create": "Create Short Link",
+  "link.button.create-another": "Create Another Link",
+  "link.notify.created": "Short link created successfully",
+  "link.success.title": "Link Created!",
+  "link.success.description":
+    "Your short link has been created. Share it with anyone!",
+  "navbar.links.link": "Short Links",
 };

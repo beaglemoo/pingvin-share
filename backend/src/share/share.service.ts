@@ -436,4 +436,37 @@ export class ShareService {
       return false;
     }
   }
+
+  async getLinkShare(id: string): Promise<{ linkUrl: string; views: number }> {
+    const share = await this.prisma.share.findUnique({
+      where: { id },
+      include: { security: true },
+    });
+
+    if (!share || share.shareType !== "LINK") {
+      throw new NotFoundException("Link share not found");
+    }
+
+    if (share.removedReason) {
+      throw new NotFoundException(share.removedReason, "share_removed");
+    }
+
+    // Check expiration
+    if (!dayjs(share.expiration).isSame(0) && dayjs().isAfter(share.expiration)) {
+      throw new NotFoundException("Link has expired");
+    }
+
+    // Check max views
+    if (share.security?.maxViews && share.views >= share.security.maxViews) {
+      throw new NotFoundException("Maximum views exceeded");
+    }
+
+    // Increment view count
+    await this.increaseViewCount(share);
+
+    return {
+      linkUrl: share.linkUrl!,
+      views: share.views + 1,
+    };
+  }
 }
