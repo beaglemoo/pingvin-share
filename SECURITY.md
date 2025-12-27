@@ -2,8 +2,17 @@
 
 ## Supported Versions
 
-Older versions of Pingvin Share do not receive security updates. To ensure your system remains secure, we strongly recommend updating Pingvin Share regularly. You can automate these updates using tools like [Watchtower](https://github.com/containrrr/watchtower).
+This fork is actively maintained. We recommend keeping your instance up to date for the latest security fixes.
 
 ## Reporting a Vulnerability
 
-Thank you for taking the time to report a vulnerability. Please DO NOT create an issue on GitHub because the vulnerability could get exploited. Instead please write an email to [elias@eliasschneider.com](mailto:elias@eliasschneider.com).
+If you discover a security vulnerability, please report it responsibly:
+
+1. **Do NOT** create a public GitHub issue
+2. Open a private security advisory at [GitHub Security Advisories](https://github.com/beaglemoo/pingvin-share/security/advisories/new)
+
+We will respond as quickly as possible and work with you to understand and resolve the issue.
+
+## Upstream Security
+
+For security issues in the original Pingvin Share project, please report them to the [upstream repository](https://github.com/stonith404/pingvin-share).

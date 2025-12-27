@@ -1,3 +1,38 @@
+# Changelog
+
+## Fork Changes (beaglemoo/pingvin-share)
+
+These changes are specific to this fork and built on top of upstream v1.13.0.
+
+### Features
+
+* **share-types:** Add share type system (FILE, LINK, PASTE)
+* **linkshare:** URL shortening with expiration, passwords, and view limits
+* **pasteshare:** Text/code sharing with syntax highlighting (25+ languages)
+* **proxmox:** Add Proxmox LXC installation scripts
+
+### Improvements
+
+* **accessibility:** Add aria-labels to all ActionIcons
+* **i18n:** Replace hardcoded English strings with translations
+* **performance:** Add React memoization (React.memo, useCallback, useMemo)
+* **ui:** Add empty, loading, and error states to components
+* **backend:** Replace moment.js with dayjs (smaller bundle)
+* **backend:** Replace throw Error with NestJS exceptions
+* **backend:** Add logging to silent catch blocks
+* **backend:** Invalidate old login tokens on new login
+* **backend:** Add validation for timespan config values
+
+### Bug Fixes
+
+* **type-safety:** Fix various TypeScript type issues
+* **s3:** Fix console.error → NestJS Logger
+* **code-quality:** Fix typos and null checks
+
+---
+
+## Upstream Changelog
+
 ## [1.13.0](https://github.com/stonith404/pingvin-share/compare/v1.12.0...v1.13.0) (2025-05-25)
 
 
