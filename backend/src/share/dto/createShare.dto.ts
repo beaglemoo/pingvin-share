@@ -1,14 +1,23 @@
 import { Type } from "class-transformer";
 import {
   IsEmail,
+  IsEnum,
   IsOptional,
   IsString,
+  IsUrl,
   Length,
   Matches,
   MaxLength,
+  ValidateIf,
   ValidateNested,
 } from "class-validator";
 import { ShareSecurityDTO } from "./shareSecurity.dto";
+
+export enum ShareType {
+  FILE = "FILE",
+  LINK = "LINK",
+  PASTE = "PASTE",
+}
 
 export class CreateShareDTO {
   @IsString()
@@ -35,4 +44,27 @@ export class CreateShareDTO {
   @ValidateNested()
   @Type(() => ShareSecurityDTO)
   security: ShareSecurityDTO;
+
+  // Share type discriminator (defaults to FILE for backwards compatibility)
+  @IsEnum(ShareType)
+  @IsOptional()
+  shareType?: ShareType;
+
+  // For LINK type - the URL to redirect to
+  @ValidateIf((o) => o.shareType === ShareType.LINK)
+  @IsUrl({}, { message: "linkUrl must be a valid URL" })
+  linkUrl?: string;
+
+  // For PASTE type - the text content
+  @ValidateIf((o) => o.shareType === ShareType.PASTE)
+  @IsString()
+  @MaxLength(1000000) // 1MB text limit
+  pasteContent?: string;
+
+  // For PASTE type - syntax highlighting language
+  @ValidateIf((o) => o.shareType === ShareType.PASTE)
+  @IsString()
+  @IsOptional()
+  @MaxLength(50)
+  pasteSyntax?: string;
 }

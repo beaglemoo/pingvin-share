@@ -1,6 +1,8 @@
 import { FileMetaData } from "./File.type";
 import User from "./user.type";
 
+export type ShareType = "FILE" | "LINK" | "PASTE";
+
 export type Share = {
   id: string;
   name?: string;
@@ -10,6 +12,13 @@ export type Share = {
   expiration: Date;
   size: number;
   hasPassword: boolean;
+  // Share type discriminator
+  shareType: ShareType;
+  // For LINK type
+  linkUrl?: string;
+  // For PASTE type
+  pasteContent?: string;
+  pasteSyntax?: string;
 };
 
 export type CompletedShare = Share & {
@@ -28,6 +37,13 @@ export type CreateShare = {
   recipients: string[];
   expiration: string;
   security: ShareSecurity;
+  // Share type discriminator
+  shareType?: ShareType;
+  // For LINK type
+  linkUrl?: string;
+  // For PASTE type
+  pasteContent?: string;
+  pasteSyntax?: string;
 };
 
 export type ShareMetaData = {

@@ -7,6 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ShareType {
+  FILE  // Current behavior (default) - file sharing
+  LINK  // URL shortening
+  PASTE // Text/code sharing
+}
+
 model User {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
@@ -85,6 +91,16 @@ model Share {
   expiration    DateTime
   description   String?
   removedReason String?
+
+  // Share type discriminator
+  shareType    ShareType @default(FILE)
+
+  // For LINK type (URL shortening)
+  linkUrl      String?
+
+  // For PASTE type (text/code sharing)
+  pasteContent String?
+  pasteSyntax  String?   // Language for syntax highlighting (e.g., "javascript", "python")
 
   creatorId String?
   creator   User?   @relation(fields: [creatorId], references: [id], onDelete: Cascade)

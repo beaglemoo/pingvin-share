@@ -18,7 +18,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { ReverseShareService } from "src/reverseShare/reverseShare.service";
 import { parseRelativeDateToAbsolute } from "src/utils/date.util";
 import { SHARE_DIRECTORY } from "../constants";
-import { CreateShareDTO } from "./dto/createShare.dto";
+import { CreateShareDTO, ShareType } from "./dto/createShare.dto";
 
 @Injectable()
 export class ShareService {
@@ -42,6 +42,17 @@ export class ShareService {
 
     if (share.security?.password) {
       share.security.password = await argon.hash(share.security.password);
+    }
+
+    // Determine share type (default to FILE for backwards compatibility)
+    const shareType = share.shareType || ShareType.FILE;
+
+    // Validate type-specific requirements
+    if (shareType === ShareType.LINK && !share.linkUrl) {
+      throw new BadRequestException("linkUrl is required for LINK shares");
+    }
+    if (shareType === ShareType.PASTE && !share.pasteContent) {
+      throw new BadRequestException("pasteContent is required for PASTE shares");
     }
 
     let expirationDate: Date;
@@ -71,14 +82,25 @@ export class ShareService {
       expirationDate = parsedExpiration;
     }
 
-    fs.mkdirSync(`${SHARE_DIRECTORY}/${share.id}`, {
-      recursive: true,
-    });
+    // Only create file directory for FILE shares
+    if (shareType === ShareType.FILE) {
+      fs.mkdirSync(`${SHARE_DIRECTORY}/${share.id}`, {
+        recursive: true,
+      });
+    }
 
     const shareTuple = await this.prisma.share.create({
       data: {
-        ...share,
+        id: share.id,
+        name: share.name,
+        description: share.description,
         expiration: expirationDate,
+        shareType: shareType,
+        linkUrl: shareType === ShareType.LINK ? share.linkUrl : undefined,
+        pasteContent: shareType === ShareType.PASTE ? share.pasteContent : undefined,
+        pasteSyntax: shareType === ShareType.PASTE ? share.pasteSyntax : undefined,
+        // LINK and PASTE shares are immediately complete (no file upload needed)
+        uploadLocked: shareType !== ShareType.FILE,
         creator: { connect: user ? { id: user.id } : undefined },
         security: { create: share.security },
         recipients: {
@@ -86,7 +108,9 @@ export class ShareService {
             ? share.recipients.map((email) => ({ email }))
             : [],
         },
-        storageProvider: this.configService.get("s3.enabled") ? "S3" : "LOCAL",
+        storageProvider: shareType === ShareType.FILE
+          ? (this.configService.get("s3.enabled") ? "S3" : "LOCAL")
+          : "LOCAL",
       },
     });
 
@@ -100,6 +124,19 @@ export class ShareService {
           },
         },
       });
+    }
+
+    // Send emails for LINK and PASTE shares immediately (they're already complete)
+    if (shareType !== ShareType.FILE && share.recipients?.length > 0) {
+      for (const email of share.recipients) {
+        await this.emailService.sendMailToShareRecipients(
+          email,
+          share.id,
+          user,
+          share.description,
+          expirationDate,
+        );
+      }
     }
 
     return shareTuple;
@@ -267,9 +304,15 @@ export class ShareService {
 
     if (!share || !share.uploadLocked)
       throw new NotFoundException("Share not found");
+
     return {
       ...share,
       hasPassword: !!share.security?.password,
+      // Include type-specific fields
+      shareType: share.shareType,
+      linkUrl: share.linkUrl,
+      pasteContent: share.pasteContent,
+      pasteSyntax: share.pasteSyntax,
     };
   }
 
