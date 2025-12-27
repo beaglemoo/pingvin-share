@@ -19,6 +19,7 @@ const TableSortIcon = ({
   if (sort.property === property) {
     return (
       <ActionIcon
+        aria-label={`Sort ${property} ${sort.direction === "asc" ? "descending" : "ascending"}`}
         onClick={() =>
           setSort({
             property,
@@ -31,7 +32,10 @@ const TableSortIcon = ({
     );
   } else {
     return (
-      <ActionIcon onClick={() => setSort({ property, direction: "asc" })}>
+      <ActionIcon
+        aria-label={`Sort by ${property}`}
+        onClick={() => setSort({ property, direction: "asc" })}
+      >
         <TbSelector />
       </ActionIcon>
     );

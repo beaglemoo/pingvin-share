@@ -386,6 +386,8 @@ export default {
   "share.modal.error.invalid-password": "Invalid password",
 
   "share.button.download-all": "Download all",
+  "share.button.download": "Download",
+  "share.button.preview": "Preview",
   "share.notify.download-all-preparing":
     "The share is being prepared. Please try again in a few minutes.",
 
@@ -739,6 +741,8 @@ export default {
   "common.button.share": "Share",
   "common.button.generate": "Generate",
   "common.button.done": "Done",
+  "common.button.edit": "Edit",
+  "common.button.copy-link": "Copy link",
   "common.text.link": "Link",
   "common.text.navigate-to-link": "Visit link",
   "common.text.or": "or",

@@ -3,7 +3,8 @@ import { useModals } from "@mantine/modals";
 import { TbCheck, TbEdit, TbTrash } from "react-icons/tb";
 import User from "../../../types/user.type";
 import showUpdateUserModal from "./showUpdateUserModal";
-import { FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage } from "react-intl";
+import useTranslate from "../../../hooks/useTranslate.hook";
 
 const ManageUserTable = ({
   users,
@@ -17,6 +18,7 @@ const ManageUserTable = ({
   isLoading: boolean;
 }) => {
   const modals = useModals();
+  const t = useTranslate();
 
   return (
     <Box sx={{ display: "block", overflowX: "auto" }}>
@@ -52,6 +54,7 @@ const ManageUserTable = ({
                     <Group position="right">
                       {user.isLdap ? null : (
                         <ActionIcon
+                          aria-label={t("common.button.edit")}
                           variant="light"
                           color="primary"
                           size="sm"
@@ -63,6 +66,7 @@ const ManageUserTable = ({
                         </ActionIcon>
                       )}
                       <ActionIcon
+                        aria-label={t("common.button.delete")}
                         variant="light"
                         color="red"
                         size="sm"

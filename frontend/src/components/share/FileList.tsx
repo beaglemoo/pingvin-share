@@ -117,6 +117,7 @@ const FileList = ({
                     <Group position="right">
                       {shareService.doesFileSupportPreview(file.name) && (
                         <ActionIcon
+                          aria-label={t("share.button.preview")}
                           onClick={() =>
                             showFilePreviewModal(share.id, file, modals)
                           }
@@ -127,6 +128,7 @@ const FileList = ({
                       )}
                       {!share.hasPassword && (
                         <ActionIcon
+                          aria-label={t("common.button.copy-link")}
                           size={25}
                           onClick={() => copyFileLink(file)}
                         >
@@ -134,6 +136,7 @@ const FileList = ({
                         </ActionIcon>
                       )}
                       <ActionIcon
+                        aria-label={t("share.button.download")}
                         size={25}
                         onClick={async () => {
                           await shareService.downloadFile(share.id, file.id);

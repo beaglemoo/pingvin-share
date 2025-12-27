@@ -48,7 +48,7 @@ function CopyTextField(props: { link: string }) {
             openDelay={200}
           >
             <a href={props.link}>
-              <ActionIcon>
+              <ActionIcon aria-label={t("common.text.navigate-to-link")}>
                 <IoOpenOutline />
               </ActionIcon>
             </a>
@@ -61,7 +61,10 @@ function CopyTextField(props: { link: string }) {
               offset={-2}
               openDelay={200}
             >
-              <ActionIcon onClick={copyLink}>
+              <ActionIcon
+                aria-label={t("common.button.clickToCopy")}
+                onClick={copyLink}
+              >
                 {checkState ? <TbCheck /> : <TbCopy />}
               </ActionIcon>
             </Tooltip>
