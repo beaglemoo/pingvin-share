@@ -786,4 +786,31 @@ export default {
   "link.success.description":
     "Your short link has been created. Share it with anyone!",
   "navbar.links.link": "Short Links",
+
+  // PasteShare
+  "paste.title": "Create Paste",
+  "paste.form.content": "Content",
+  "paste.form.content.placeholder": "Paste your text or code here...",
+  "paste.form.syntax": "Syntax Highlighting",
+  "paste.form.syntax.placeholder": "Select language (optional)",
+  "paste.error.too-long": "Content is too long (max 1MB)",
+  "paste.button.create": "Create Paste",
+  "paste.button.create-another": "Create Another Paste",
+  "paste.notify.created": "Paste created successfully",
+  "paste.notify.copied": "Content copied to clipboard",
+  "paste.success.title": "Paste Created!",
+  "paste.success.description":
+    "Your paste has been created. Share the link with anyone!",
+  "paste.view.title": "Paste {id}",
+  "paste.view.loading": "Loading paste...",
+  "paste.view.error": "Error loading paste",
+  "paste.view.not-found": "Paste not found",
+  "paste.info.views": "{count} views",
+  "paste.info.syntax": "Language: {syntax}",
+  "paste.info.lines": "{count} lines",
+  "paste.info.created": "Created: {date}",
+  "paste.action.copy": "Copy content",
+  "paste.action.download": "Download",
+  "paste.action.raw": "View raw",
+  "navbar.links.paste": "Paste",
 };

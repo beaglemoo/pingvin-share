@@ -469,4 +469,52 @@ export class ShareService {
       views: share.views + 1,
     };
   }
+
+  async getPasteShare(id: string): Promise<{
+    id: string;
+    name: string | null;
+    description: string | null;
+    pasteContent: string;
+    pasteSyntax: string | null;
+    views: number;
+    expiration: Date;
+    createdAt: Date;
+  }> {
+    const share = await this.prisma.share.findUnique({
+      where: { id },
+      include: { security: true },
+    });
+
+    if (!share || share.shareType !== "PASTE") {
+      throw new NotFoundException("Paste not found");
+    }
+
+    if (share.removedReason) {
+      throw new NotFoundException(share.removedReason, "share_removed");
+    }
+
+    // Check expiration
+    if (!dayjs(share.expiration).isSame(0) && dayjs().isAfter(share.expiration)) {
+      throw new NotFoundException("Paste has expired");
+    }
+
+    // Check max views
+    if (share.security?.maxViews && share.views >= share.security.maxViews) {
+      throw new NotFoundException("Maximum views exceeded");
+    }
+
+    // Increment view count
+    await this.increaseViewCount(share);
+
+    return {
+      id: share.id,
+      name: share.name,
+      description: share.description,
+      pasteContent: share.pasteContent!,
+      pasteSyntax: share.pasteSyntax,
+      views: share.views + 1,
+      expiration: share.expiration,
+      createdAt: share.createdAt,
+    };
+  }
 }

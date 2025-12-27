@@ -1,6 +1,6 @@
 import { ActionIcon, Menu } from "@mantine/core";
 import Link from "next/link";
-import { TbArrowLoopLeft, TbExternalLink, TbLink } from "react-icons/tb";
+import { TbArrowLoopLeft, TbClipboardText, TbExternalLink, TbLink } from "react-icons/tb";
 import { FormattedMessage } from "react-intl";
 
 const NavbarShareMneu = () => {
@@ -28,6 +28,13 @@ const NavbarShareMneu = () => {
           icon={<TbExternalLink />}
         >
           <FormattedMessage id="navbar.links.link" />
+        </Menu.Item>
+        <Menu.Item
+          component={Link}
+          href="/paste"
+          icon={<TbClipboardText />}
+        >
+          <FormattedMessage id="navbar.links.paste" />
         </Menu.Item>
       </Menu.Dropdown>
     </Menu>
