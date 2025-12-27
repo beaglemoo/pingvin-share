@@ -118,7 +118,11 @@ export class AuthService {
   }
 
   async generateToken(user: User, oauth?: { idToken?: string }) {
-    // TODO: Make all old loginTokens invalid when a new one is created
+    // Invalidate all existing login tokens for this user
+    await this.prisma.loginToken.deleteMany({
+      where: { userId: user.id },
+    });
+
     // Check if the user has TOTP enabled
     if (user.totpVerified && !(oauth && this.config.get("oauth.ignoreTotp"))) {
       const loginToken = await this.createLoginToken(user.id);
