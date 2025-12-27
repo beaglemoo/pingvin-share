@@ -166,17 +166,11 @@ start_container() {
 run_install() {
   msg_info "Running installation script"
 
-  # Get the directory where this script is located
-  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  INSTALL_SCRIPT="${SCRIPT_DIR}/../install/pingvin-share-install.sh"
+  # GitHub raw URL for install script
+  INSTALL_URL="https://raw.githubusercontent.com/beaglemoo/pingvin-share/main/proxmox-lxc/install/pingvin-share-install.sh"
 
-  if [ ! -f "$INSTALL_SCRIPT" ]; then
-    msg_error "Install script not found at $INSTALL_SCRIPT"
-    exit 1
-  fi
-
-  # Push install script to container and execute
-  pct push "$CTID" "$INSTALL_SCRIPT" /tmp/pingvin-share-install.sh
+  # Download and execute install script inside container
+  pct exec "$CTID" -- bash -c "curl -fsSL '$INSTALL_URL' -o /tmp/pingvin-share-install.sh"
   pct exec "$CTID" -- chmod +x /tmp/pingvin-share-install.sh
   pct exec "$CTID" -- bash /tmp/pingvin-share-install.sh
 

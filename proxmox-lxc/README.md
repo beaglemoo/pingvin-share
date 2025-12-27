@@ -4,19 +4,22 @@ This directory contains scripts to deploy Pingvin Share as a native LXC containe
 
 ## Quick Start
 
-### 1. Copy scripts to your Proxmox host
+### Option 1: One-liner (Recommended)
+
+Run this command directly on your Proxmox host:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/beaglemoo/pingvin-share/main/proxmox-lxc/ct/PingvinShare.sh)"
+```
+
+### Option 2: Manual Installation
 
 ```bash
 # On your Proxmox host
 mkdir -p /root/pingvin-lxc
 # Copy the entire proxmox-lxc folder to your Proxmox host
-```
-
-### 2. Run the container creation script
-
-```bash
 cd /root/pingvin-lxc
-chmod +x ct/PingvinShare.sh install/pingvin-share-install.sh
+chmod +x ct/PingvinShare.sh
 bash ct/PingvinShare.sh
 ```
 
