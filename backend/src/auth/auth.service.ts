@@ -12,7 +12,7 @@ import { User } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import * as argon from "argon2";
 import { Request, Response } from "express";
-import * as moment from "moment";
+import dayjs from "dayjs";
 import { ConfigService } from "src/config/config.service";
 import { EmailService } from "src/email/email.service";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -168,7 +168,7 @@ export class AuthService {
 
     const { token } = await this.prisma.resetPasswordToken.create({
       data: {
-        expiresAt: moment().add(1, "hour").toDate(),
+        expiresAt: dayjs().add(1, "hour").toDate(),
         user: { connect: { id: user.id } },
       },
     });
@@ -311,7 +311,7 @@ export class AuthService {
     const { id, token } = await this.prisma.refreshToken.create({
       data: {
         userId,
-        expiresAt: moment()
+        expiresAt: dayjs()
           .add(sessionDuration.value, sessionDuration.unit)
           .toDate(),
         oauthIDToken: idToken,
@@ -324,7 +324,7 @@ export class AuthService {
   async createLoginToken(userId: string) {
     const loginToken = (
       await this.prisma.loginToken.create({
-        data: { userId, expiresAt: moment().add(5, "minutes").toDate() },
+        data: { userId, expiresAt: dayjs().add(5, "minutes").toDate() },
       })
     ).token;
 
@@ -344,9 +344,9 @@ export class AuthService {
         maxAge: 1000 * 60 * 60 * 24 * 30 * 3, // 3 months
       });
     if (refreshToken) {
-      const now = moment();
+      const now = dayjs();
       const sessionDuration = this.config.get("general.sessionDuration");
-      const maxAge = moment(now)
+      const maxAge = dayjs(now)
         .add(sessionDuration.value, sessionDuration.unit)
         .diff(now);
       response.cookie("refresh_token", refreshToken, {

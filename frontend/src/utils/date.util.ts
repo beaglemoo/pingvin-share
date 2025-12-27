@@ -1,5 +1,8 @@
-import moment from "moment";
+import dayjs, { ManipulateType } from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
 import { Timespan } from "../types/timespan.type";
+
+dayjs.extend(localizedFormat);
 
 export const getExpirationPreview = (
   messages: {
@@ -19,16 +22,16 @@ export const getExpirationPreview = (
     : form.values.expiration_num + form.values.expiration_unit;
   if (value === "never") return messages.neverExpires;
 
-  const expirationDate = moment()
+  const expirationDate = dayjs()
     .add(
-      value.split("-")[0],
-      value.split("-")[1] as moment.unitOfTime.DurationConstructor,
+      parseInt(value.split("-")[0]),
+      value.split("-")[1] as ManipulateType,
     )
     .toDate();
 
   return messages.expiresOn.replace(
     "{expiration}",
-    moment(expirationDate).format("LLL"),
+    dayjs(expirationDate).format("LLL"),
   );
 };
 

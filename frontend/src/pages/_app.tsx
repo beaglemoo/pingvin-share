@@ -10,8 +10,21 @@ import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
-import moment from "moment";
-import "moment/min/locales";
+import dayjs from "dayjs";
+import "dayjs/locale/de";
+import "dayjs/locale/es";
+import "dayjs/locale/fr";
+import "dayjs/locale/it";
+import "dayjs/locale/ja";
+import "dayjs/locale/ko";
+import "dayjs/locale/nl";
+import "dayjs/locale/pl";
+import "dayjs/locale/pt";
+import "dayjs/locale/ru";
+import "dayjs/locale/zh";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+
+dayjs.extend(localizedFormat);
 import { GetServerSidePropsContext } from "next";
 import type { AppProps } from "next/app";
 import Head from "next/head";
@@ -87,7 +100,7 @@ function App({ Component, pageProps }: AppProps) {
   };
 
   const language = useRef(pageProps.language);
-  moment.locale(language.current);
+  dayjs.locale(language.current);
 
   return (
     <>
