@@ -11,6 +11,7 @@ import Markdown, { MarkdownToJSX } from "markdown-to-jsx";
 import Link from "next/link";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
+import useTranslate from "../../hooks/useTranslate.hook";
 import api from "../../services/api.service";
 
 const FilePreviewContext = React.createContext<{
@@ -34,6 +35,7 @@ const FilePreview = ({
   fileId: string;
   mimeType: string;
 }) => {
+  const t = useTranslate();
   const [isNotSupported, setIsNotSupported] = useState(false);
   if (isNotSupported) return <UnSupportedFile />;
 
@@ -51,8 +53,7 @@ const FilePreview = ({
         target="_blank"
         href={`/api/shares/${shareId}/files/${fileId}?download=false`}
       >
-        View original file
-        {/* Add translation? */}
+        {t("share.modal.file-preview.view-original")}
       </Button>
     </Stack>
   );

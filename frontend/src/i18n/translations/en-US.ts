@@ -398,6 +398,7 @@ export default {
   "share.modal.file-preview.error.not-supported.title": "Preview not supported",
   "share.modal.file-preview.error.not-supported.description":
     "Previews are not supported for this type of files. Please download the file to view it.",
+  "share.modal.file-preview.view-original": "View original file",
 
   // END /share/[id]
 
@@ -531,6 +532,14 @@ export default {
   "admin.config.smtp.password": "Password",
   "admin.config.smtp.password.description": "Password of the SMTP server",
   "admin.config.smtp.button.test": "Send test email",
+  "admin.config.smtp.test.success": "Email sent successfully",
+  "admin.config.smtp.test.error.title": "Failed to send email",
+  "admin.config.smtp.test.error.description":
+    "While sending the test email, the following error occurred:",
+  "admin.config.smtp.test.save-config.title": "Save configuration",
+  "admin.config.smtp.test.save-config.description":
+    "To continue you need to save the configuration first. Do you want to save the configuration and send the test email?",
+  "admin.config.smtp.test.save-config.button": "Save and send",
   "admin.config.smtp.allow-unauthorized-certificates":
     "Trust unauthorized SMTP server certificates",
   "admin.config.smtp.allow-unauthorized-certificates.description":
@@ -749,6 +758,8 @@ export default {
   "common.text.redirecting": "Redirecting...",
   "common.button.go-back": "Go back",
   "common.button.go-home": "Go home",
+  "common.label.never": "Never",
+  "common.text.powered-by": "Powered by",
   "common.notify.copied": "Your link was copied to the clipboard",
   "common.notify.copied-link": "Your link was copied to the clipboard",
   "common.success": "Success",

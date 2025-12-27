@@ -183,7 +183,7 @@ const MyShares = () => {
                   </td>
                   <td>
                     {dayjs(reverseShare.shareExpiration).unix() === 0
-                      ? "Never"
+                      ? t("common.label.never")
                       : dayjs(reverseShare.shareExpiration).format("LLL")}
                   </td>
                   <td>

@@ -23,7 +23,7 @@ const showShareInformationsModal = (
   const formattedCreatedAt = dayjs(share.createdAt).format("LLL");
   const formattedExpiration =
     dayjs(share.expiration).unix() === 0
-      ? "Never"
+      ? t("common.label.never")
       : dayjs(share.expiration).format("LLL");
 
   return modals.openModal({

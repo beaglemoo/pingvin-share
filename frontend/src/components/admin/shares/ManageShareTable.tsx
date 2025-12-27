@@ -77,7 +77,7 @@ const ManageShareTable = ({
                   <td>{byteToHumanSizeString(share.size)}</td>
                   <td>
                     {dayjs(share.expiration).unix() === 0
-                      ? "Never"
+                      ? t("common.label.never")
                       : dayjs(share.expiration).format("LLL")}
                   </td>
                   <td>
