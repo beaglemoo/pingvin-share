@@ -52,12 +52,12 @@ export class ClamScanService {
           return { isInfected: false };
         });
 
-      const fileName = (
-        await this.prisma.file.findUnique({ where: { id: fileId } })
-      ).name;
+      const file = await this.prisma.file.findUnique({
+        where: { id: fileId },
+      });
 
-      if (isInfected) {
-        infectedFiles.push({ id: fileId, name: fileName });
+      if (isInfected && file) {
+        infectedFiles.push({ id: fileId, name: file.name });
       }
     }
 
