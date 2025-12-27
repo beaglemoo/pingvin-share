@@ -6,7 +6,7 @@ export type ShareType = "FILE" | "LINK" | "PASTE";
 export type Share = {
   id: string;
   name?: string;
-  files: FileMetaData[];
+  files?: FileMetaData[];
   creator?: User;
   description?: string;
   expiration: Date;

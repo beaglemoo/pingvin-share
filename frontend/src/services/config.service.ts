@@ -1,6 +1,5 @@
 import axios from "axios";
 import Config, { AdminConfig, UpdateConfig } from "../types/config.type";
-import { Timespan } from "../types/timespan.type";
 import api from "./api.service";
 import { stringToTimespan } from "../utils/date.util";
 
@@ -16,10 +15,7 @@ const updateMany = async (data: UpdateConfig[]): Promise<AdminConfig[]> => {
   return (await api.patch("/configs/admin", data)).data;
 };
 
-const get = (
-  key: string,
-  configVariables: Config[],
-): string | number | boolean | Timespan | null => {
+const get = (key: string, configVariables: Config[]): any => {
   if (!configVariables) return null;
 
   const configVariable = configVariables.filter(

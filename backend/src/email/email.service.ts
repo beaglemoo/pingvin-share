@@ -4,8 +4,8 @@ import {
   Logger,
 } from "@nestjs/common";
 import { User } from "@prisma/client";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
+import * as dayjs from "dayjs";
+import * as relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 import * as nodemailer from "nodemailer";

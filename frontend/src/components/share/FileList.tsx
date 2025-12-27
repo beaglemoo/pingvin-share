@@ -21,7 +21,6 @@ import React, {
 } from "react";
 import { TbDownload, TbEye, TbLink } from "react-icons/tb";
 import { FormattedMessage } from "react-intl";
-import useConfig from "../../hooks/config.hook";
 import useTranslate from "../../hooks/useTranslate.hook";
 import shareService from "../../services/share.service";
 import { FileMetaData } from "../../types/File.type";
@@ -43,7 +42,6 @@ const FileList = memo(function FileList({
   isLoading: boolean;
 }) {
   const clipboard = useClipboard();
-  const config = useConfig();
   const modals = useModals();
   const t = useTranslate();
 
@@ -54,24 +52,17 @@ const FileList = memo(function FileList({
 
   const sortFiles = useCallback(() => {
     if (files && sort.property) {
+      const prop = sort.property as keyof FileMetaData;
       const sortedFiles = [...files].sort(
         (a: FileMetaData, b: FileMetaData) => {
           if (sort.direction === "asc") {
-            return b[sort.property!].localeCompare(
-              a[sort.property!],
-              undefined,
-              {
-                numeric: true,
-              },
-            );
+            return String(b[prop]).localeCompare(String(a[prop]), undefined, {
+              numeric: true,
+            });
           } else {
-            return a[sort.property!].localeCompare(
-              b[sort.property!],
-              undefined,
-              {
-                numeric: true,
-              },
-            );
+            return String(a[prop]).localeCompare(String(b[prop]), undefined, {
+              numeric: true,
+            });
           }
         },
       );

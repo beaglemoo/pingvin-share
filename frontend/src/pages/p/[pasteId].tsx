@@ -2,7 +2,6 @@ import {
   ActionIcon,
   Box,
   Code,
-  CopyButton,
   Group,
   Paper,
   ScrollArea,
@@ -16,7 +15,7 @@ import { useClipboard } from "@mantine/hooks";
 import dayjs from "dayjs";
 import { GetServerSidePropsContext } from "next";
 import { useEffect, useState } from "react";
-import { TbCheck, TbCopy, TbDownload, TbExternalLink } from "react-icons/tb";
+import { TbCopy, TbDownload, TbExternalLink } from "react-icons/tb";
 import { FormattedMessage } from "react-intl";
 import Meta from "../../components/Meta";
 import useTranslate from "../../hooks/useTranslate.hook";

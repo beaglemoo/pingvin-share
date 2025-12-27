@@ -15,7 +15,6 @@ import {
   Title,
 } from "@mantine/core";
 import { useForm, yupResolver } from "@mantine/form";
-import { useModals } from "@mantine/modals";
 import dayjs, { ManipulateType } from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { useState } from "react";
@@ -25,7 +24,6 @@ import Meta from "../../components/Meta";
 import CopyTextField from "../../components/upload/CopyTextField";
 import useConfig from "../../hooks/config.hook";
 import useTranslate from "../../hooks/useTranslate.hook";
-import useUser from "../../hooks/user.hook";
 import shareService from "../../services/share.service";
 import { Timespan } from "../../types/timespan.type";
 import { getExpirationPreview } from "../../utils/date.util";
@@ -46,10 +44,8 @@ const generateShareId = (length: number = 16) => {
 };
 
 const CreateLink = () => {
-  const modals = useModals();
   const t = useTranslate();
   const config = useConfig();
-  const { user } = useUser();
 
   const [isLoading, setIsLoading] = useState(false);
   const [createdLink, setCreatedLink] = useState<string | null>(null);

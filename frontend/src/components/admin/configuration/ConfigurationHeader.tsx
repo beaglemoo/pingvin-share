@@ -38,7 +38,7 @@ const ConfigurationHeader = ({
           <Link href="/" passHref>
             <Group>
               <Logo height={35} width={35} />
-              <Text weight={600}>{config.get("general.appName")}</Text>
+              <Text weight={600}>{config.get("general.appName") as string}</Text>
             </Group>
           </Link>
           <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
