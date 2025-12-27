@@ -1,18 +1,16 @@
-> ## ⚠️ Project Archived
->
-> After much consideration, I've chosen to focus my limited time and energy on my other project, [Pocket ID](https://github.com/pocket-id/pocket-id). As a solo developer, I've found it difficult to actively maintain multiple open source projects with the care and attention they deserve.
->
-> If you're interested in continuing this work through a fork, I'd be happy to link to it here in the README.
->
-> Thanks to all the contributors and users who have supported Pingvin Share over the years :)
-
 # <div align="center"><img  src="https://user-images.githubusercontent.com/58886915/166198400-c2134044-1198-4647-a8b6-da9c4a204c68.svg" width="40"/> </br>Pingvin Share</div>
 
-[![](https://dcbadge.limes.pink/api/server/wHRQ9nFRcK)](https://discord.gg/wHRQ9nFRcK) [![](https://img.shields.io/badge/Crowdin-2E3340.svg?style=for-the-badge&logo=Crowdin&logoColor=white)](https://crowdin.com/project/pingvin-share) [![](https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#white)](https://github.com/sponsors/stonith404)
+<div align="center">
+
+[![](https://img.shields.io/badge/Fork_of-stonith404/pingvin--share-blue?style=for-the-badge)](https://github.com/stonith404/pingvin-share)
+
+</div>
 
 ---
 
 Pingvin Share is a self-hosted file sharing platform and an alternative for WeTransfer.
+
+This is an actively maintained fork of the [original project](https://github.com/stonith404/pingvin-share) with additional features and improvements.
 
 ## ✨ Features
 
@@ -25,6 +23,16 @@ Pingvin Share is a self-hosted file sharing platform and an alternative for WeTr
 - OIDC and LDAP authentication
 - Integration with ClamAV for security scans
 - Different file providers: local storage and S3
+
+### Fork Enhancements
+
+- **Short Links** - URL shortening with expiration, passwords, and view limits
+- **Paste Sharing** - Share text and code snippets with syntax highlighting
+- Improved error handling and logging
+- Better accessibility (aria-labels)
+- React performance optimizations
+- Enhanced UI states (loading, empty, error)
+- Proxmox LXC installation script
 
 ## 🐧 Get to know Pingvin Share
 
@@ -51,4 +59,10 @@ For more installation options and advanced configurations, please refer to the [
 
 ## 🖤 Contribute
 
-We would love it if you want to help make Pingvin Share better! You can either [help to translate](https://stonith404.github.io/pingvin-share/help-out/translate) Pingvin Share or [contribute to the codebase](https://stonith404.github.io/pingvin-share/help-out/contribute).
+Contributions are welcome! Feel free to open issues or submit pull requests.
+
+For translations and upstream documentation, see the [original project](https://github.com/stonith404/pingvin-share).
+
+## 🙏 Credits
+
+This fork is based on [Pingvin Share](https://github.com/stonith404/pingvin-share) by [stonith404](https://github.com/stonith404). Thanks to all the original contributors!
