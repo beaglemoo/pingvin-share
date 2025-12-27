@@ -1,9 +1,10 @@
+import { FileMetaData } from "./File.type";
 import User from "./user.type";
 
 export type Share = {
   id: string;
   name?: string;
-  files: any;
+  files: FileMetaData[];
   creator?: User;
   description?: string;
   expiration: Date;

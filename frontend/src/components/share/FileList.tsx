@@ -45,7 +45,7 @@ const FileList = ({
 
   const sortFiles = () => {
     if (files && sort.property) {
-      const sortedFiles = files.sort((a: any, b: any) => {
+      const sortedFiles = files.sort((a: FileMetaData, b: FileMetaData) => {
         if (sort.direction === "asc") {
           return b[sort.property!].localeCompare(a[sort.property!], undefined, {
             numeric: true,
