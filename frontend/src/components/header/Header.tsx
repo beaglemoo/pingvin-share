@@ -13,7 +13,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import useConfig from "../../hooks/config.hook";
 import useUser from "../../hooks/user.hook";
 import useTranslate from "../../hooks/useTranslate.hook";
@@ -123,44 +123,53 @@ const Header = () => {
     setCurrentRoute(router.pathname);
   }, [router.pathname]);
 
-  const authenticatedLinks: NavLink[] = [
-    {
-      link: "/upload",
-      label: t("navbar.upload"),
-    },
-    {
-      component: <NavbarShareMenu />,
-    },
-    {
-      component: <ActionAvatar />,
-    },
-  ];
+  const authenticatedLinks: NavLink[] = useMemo(
+    () => [
+      {
+        link: "/upload",
+        label: t("navbar.upload"),
+      },
+      {
+        component: <NavbarShareMenu />,
+      },
+      {
+        component: <ActionAvatar />,
+      },
+    ],
+    [t],
+  );
 
-  let unauthenticatedLinks: NavLink[] = [
-    {
-      link: "/auth/signIn",
-      label: t("navbar.signin"),
-    },
-  ];
+  const unauthenticatedLinks: NavLink[] = useMemo(() => {
+    const links: NavLink[] = [
+      {
+        link: "/auth/signIn",
+        label: t("navbar.signin"),
+      },
+    ];
 
-  if (config.get("share.allowUnauthenticatedShares")) {
-    unauthenticatedLinks.unshift({
-      link: "/upload",
-      label: t("navbar.upload"),
-    });
-  }
+    if (config.get("share.allowUnauthenticatedShares")) {
+      links.unshift({
+        link: "/upload",
+        label: t("navbar.upload"),
+      });
+    }
 
-  if (config.get("general.showHomePage"))
-    unauthenticatedLinks.unshift({
-      link: "/",
-      label: t("navbar.home"),
-    });
+    if (config.get("general.showHomePage")) {
+      links.unshift({
+        link: "/",
+        label: t("navbar.home"),
+      });
+    }
 
-  if (config.get("share.allowRegistration"))
-    unauthenticatedLinks.push({
-      link: "/auth/signUp",
-      label: t("navbar.signup"),
-    });
+    if (config.get("share.allowRegistration")) {
+      links.push({
+        link: "/auth/signUp",
+        label: t("navbar.signup"),
+      });
+    }
+
+    return links;
+  }, [t, config]);
 
   const { classes, cx } = useStyles();
   const items = (

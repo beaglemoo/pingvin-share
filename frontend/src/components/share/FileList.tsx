@@ -9,7 +9,14 @@ import {
 } from "@mantine/core";
 import { useClipboard } from "@mantine/hooks";
 import { useModals } from "@mantine/modals";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, {
+  Dispatch,
+  memo,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { TbDownload, TbEye, TbLink } from "react-icons/tb";
 import { FormattedMessage } from "react-intl";
 import useConfig from "../../hooks/config.hook";
@@ -22,7 +29,7 @@ import toast from "../../utils/toast.util";
 import TableSortIcon, { TableSort } from "../core/SortIcon";
 import showFilePreviewModal from "./modals/showFilePreviewModal";
 
-const FileList = ({
+const FileList = memo(function FileList({
   files,
   setShare,
   share,
@@ -32,7 +39,7 @@ const FileList = ({
   setShare: Dispatch<SetStateAction<Share | undefined>>;
   share: Share;
   isLoading: boolean;
-}) => {
+}) {
   const clipboard = useClipboard();
   const config = useConfig();
   const modals = useModals();
@@ -43,48 +50,63 @@ const FileList = ({
     direction: "desc",
   });
 
-  const sortFiles = () => {
+  const sortFiles = useCallback(() => {
     if (files && sort.property) {
-      const sortedFiles = files.sort((a: FileMetaData, b: FileMetaData) => {
-        if (sort.direction === "asc") {
-          return b[sort.property!].localeCompare(a[sort.property!], undefined, {
-            numeric: true,
-          });
-        } else {
-          return a[sort.property!].localeCompare(b[sort.property!], undefined, {
-            numeric: true,
-          });
-        }
-      });
+      const sortedFiles = [...files].sort(
+        (a: FileMetaData, b: FileMetaData) => {
+          if (sort.direction === "asc") {
+            return b[sort.property!].localeCompare(
+              a[sort.property!],
+              undefined,
+              {
+                numeric: true,
+              },
+            );
+          } else {
+            return a[sort.property!].localeCompare(
+              b[sort.property!],
+              undefined,
+              {
+                numeric: true,
+              },
+            );
+          }
+        },
+      );
 
-      setShare({
-        ...share,
-        files: sortedFiles,
-      });
+      setShare((prev) =>
+        prev
+          ? {
+              ...prev,
+              files: sortedFiles,
+            }
+          : prev,
+      );
     }
-  };
+  }, [files, sort, setShare]);
 
-  const copyFileLink = (file: FileMetaData) => {
-    const link = `${window.location.origin}/api/shares/${
-      share.id
-    }/files/${file.id}`;
+  const copyFileLink = useCallback(
+    (file: FileMetaData) => {
+      const link = `${window.location.origin}/api/shares/${share.id}/files/${file.id}`;
 
-    if (window.isSecureContext) {
-      clipboard.copy(link);
-      toast.success(t("common.notify.copied-link"));
-    } else {
-      modals.openModal({
-        title: t("share.modal.file-link"),
-        children: (
-          <Stack align="stretch">
-            <TextInput variant="filled" value={link} />
-          </Stack>
-        ),
-      });
-    }
-  };
+      if (window.isSecureContext) {
+        clipboard.copy(link);
+        toast.success(t("common.notify.copied-link"));
+      } else {
+        modals.openModal({
+          title: t("share.modal.file-link"),
+          children: (
+            <Stack align="stretch">
+              <TextInput variant="filled" value={link} />
+            </Stack>
+          ),
+        });
+      }
+    },
+    [share.id, clipboard, modals, t],
+  );
 
-  useEffect(sortFiles, [sort]);
+  useEffect(sortFiles, [sort, sortFiles]);
 
   return (
     <Box sx={{ display: "block", overflowX: "auto" }}>
@@ -152,7 +174,7 @@ const FileList = ({
       </Table>
     </Box>
   );
-};
+});
 
 const skeletonRows = [...Array(5)].map((c, i) => (
   <tr key={i}>
