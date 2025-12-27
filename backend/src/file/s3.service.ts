@@ -141,7 +141,7 @@ export class S3FileService {
             }),
           );
         } catch (abortError) {
-          console.error("Error aborting multipart upload:", abortError);
+          this.logger.error("Error aborting multipart upload:", abortError);
         }
         delete this.multipartUploads[file.id];
       }
