@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { Request } from "express";
-import dayjs from "dayjs";
+import * as dayjs from "dayjs";
 import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
