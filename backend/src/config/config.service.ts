@@ -202,6 +202,24 @@ export class ConfigService extends EventEmitter {
   }
 
   validateConfigVariable(key: string, value: string | number | boolean) {
+    // Get the config variable to check its type
+    const configVariable = this.configVariables.find(
+      (variable) => `${variable.category}.${variable.name}` === key,
+    );
+
+    // Validate timespan format for timespan-type config variables
+    if (
+      configVariable?.type === "timespan" &&
+      typeof value === "string" &&
+      value !== null
+    ) {
+      if (!this.isValidTimespan(value)) {
+        throw new BadRequestException(
+          `Invalid timespan format. Expected format: "<number> <unit>" where unit is one of: minutes, hours, days, weeks, months, years`,
+        );
+      }
+    }
+
     const validations = [
       {
         key: "share.shareIdLength",
@@ -213,13 +231,32 @@ export class ConfigService extends EventEmitter {
         condition: (value: number) => value >= 0 && value <= 9,
         message: "Zip compression level must be between 0 and 9",
       },
-      // TODO add validation for timespan type
     ];
 
     const validation = validations.find((validation) => validation.key == key);
     if (validation && !validation.condition(value as any)) {
       throw new BadRequestException(validation.message);
     }
+  }
+
+  private isValidTimespan(value: string): boolean {
+    const parts = value.split(" ");
+    if (parts.length !== 2) return false;
+
+    const [timeValue, unit] = parts;
+    const numericValue = parseInt(timeValue);
+
+    if (isNaN(numericValue) || numericValue < 0) return false;
+
+    const validUnits = [
+      "minutes",
+      "hours",
+      "days",
+      "weeks",
+      "months",
+      "years",
+    ];
+    return validUnits.includes(unit);
   }
 
   isEditAllowed(): boolean {
