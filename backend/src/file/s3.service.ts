@@ -260,22 +260,18 @@ export class S3FileService {
     const s3Instance = this.getS3Instance();
     const bucketName = this.config.get("s3.bucketName");
 
-    // Try new key format (fileId) first, fall back to legacy format (fileName)
+    // Delete both possible key formats (new fileId-based and legacy fileName-based)
+    // S3 DeleteObject is idempotent - deleting non-existent keys is a no-op
+    const newKey = `${this.getS3Path()}${shareId}/${fileId}`;
+    const legacyKey = `${this.getS3Path()}${shareId}/${fileMetaData.name}`;
+
     try {
-      const newKey = `${this.getS3Path()}${shareId}/${fileId}`;
-      await s3Instance.send(
-        new DeleteObjectCommand({ Bucket: bucketName, Key: newKey }),
-      );
-    } catch {
-      // Fallback to legacy key format (fileName) for pre-migration files
-      try {
-        const legacyKey = `${this.getS3Path()}${shareId}/${fileMetaData.name}`;
-        await s3Instance.send(
-          new DeleteObjectCommand({ Bucket: bucketName, Key: legacyKey }),
-        );
-      } catch (error) {
-        throw new InternalServerErrorException("Could not delete file from S3");
-      }
+      await Promise.all([
+        s3Instance.send(new DeleteObjectCommand({ Bucket: bucketName, Key: newKey })),
+        s3Instance.send(new DeleteObjectCommand({ Bucket: bucketName, Key: legacyKey })),
+      ]);
+    } catch (error) {
+      throw new InternalServerErrorException("Could not delete file from S3");
     }
 
     await this.prisma.file.delete({ where: { id: fileId } });
