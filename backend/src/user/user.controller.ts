@@ -59,7 +59,7 @@ export class UserController {
 
     const isSecure = this.config.get("general.secureCookies");
 
-    response.cookie("access_token", "accessToken", {
+    response.cookie("access_token", "", {
       maxAge: -1,
       secure: isSecure,
     });
