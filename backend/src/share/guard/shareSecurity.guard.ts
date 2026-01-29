@@ -41,6 +41,7 @@ export class ShareSecurityGuard extends JwtGuard {
 
     if (
       !share ||
+      share.removedReason ||
       (dayjs().isAfter(share.expiration) &&
         !dayjs(share.expiration).isSame(0))
     )
