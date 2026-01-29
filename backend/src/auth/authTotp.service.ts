@@ -64,7 +64,7 @@ export class AuthTotpService {
   }
 
   async enableTotp(user: User, password: string) {
-    if (!this.authService.verifyPassword(user, password))
+    if (!(await this.authService.verifyPassword(user, password)))
       throw new ForbiddenException("Invalid password");
 
     // Check if we have a secret already
@@ -106,7 +106,7 @@ export class AuthTotpService {
   }
 
   async verifyTotp(user: User, password: string, code: string) {
-    if (!this.authService.verifyPassword(user, password))
+    if (!(await this.authService.verifyPassword(user, password)))
       throw new ForbiddenException("Invalid password");
 
     const { totpSecret } = await this.prisma.user.findUnique({
@@ -118,9 +118,7 @@ export class AuthTotpService {
       throw new BadRequestException("TOTP is not in progress");
     }
 
-    const expected = authenticator.generate(totpSecret);
-
-    if (code !== expected) {
+    if (!authenticator.check(code, totpSecret)) {
       throw new BadRequestException("Invalid code");
     }
 
@@ -135,7 +133,7 @@ export class AuthTotpService {
   }
 
   async disableTotp(user: User, password: string, code: string) {
-    if (!this.authService.verifyPassword(user, password))
+    if (!(await this.authService.verifyPassword(user, password)))
       throw new ForbiddenException("Invalid password");
 
     const { totpSecret } = await this.prisma.user.findUnique({
@@ -147,9 +145,7 @@ export class AuthTotpService {
       throw new BadRequestException("TOTP is not enabled");
     }
 
-    const expected = authenticator.generate(totpSecret);
-
-    if (code !== expected) {
+    if (!authenticator.check(code, totpSecret)) {
       throw new BadRequestException("Invalid code");
     }
 
