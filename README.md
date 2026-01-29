@@ -28,11 +28,25 @@ This is an actively maintained fork of the [original project](https://github.com
 
 - **Short Links** - URL shortening with expiration, passwords, and view limits
 - **Paste Sharing** - Share text and code snippets with syntax highlighting
+- **Password-Protected Link/Paste UI** - Proper password entry for protected short links and pastes
 - Improved error handling and logging
 - Better accessibility (aria-labels)
 - React performance optimizations
 - Enhanced UI states (loading, empty, error)
 - Proxmox LXC installation script
+
+### Security Fixes
+
+This fork includes several security improvements:
+
+- Fixed TOTP password verification bypass (missing `await`)
+- Fixed password protection bypass on Link and Paste shares
+- Added S3 upload size limit enforcement (matching local storage)
+- Fixed S3 file key collisions (files with same name no longer overwrite)
+- Fixed S3 MIME type detection
+- Added atomic view count increment to prevent race conditions
+- Added `removedReason` check in share security guard
+- Fixed cookie cleanup on account deletion
 
 ## ⌨️ Setup
 
