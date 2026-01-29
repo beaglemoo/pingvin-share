@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -56,8 +58,40 @@ export class S3FileService {
       throw new BadRequestException("Invalid file ID format");
     }
 
+    const share = await this.prisma.share.findUnique({
+      where: { id: shareId },
+      include: { files: true, reverseShare: true },
+    });
+
+    if (share.uploadLocked) {
+      throw new BadRequestException("Share is already completed");
+    }
+
     const buffer = Buffer.from(data, "base64");
-    const key = `${this.getS3Path()}${shareId}/${file.name}`;
+
+    // Check if share size limit is exceeded
+    const fileSizeSum = share.files.reduce(
+      (n, { size }) => n + parseInt(size),
+      0,
+    );
+
+    // For S3, we estimate the existing upload size from previous chunks
+    const existingUploadSize = chunk.index * this.config.get("share.chunkSize");
+    const shareSizeSum = fileSizeSum + existingUploadSize + buffer.byteLength;
+
+    if (
+      shareSizeSum > this.config.get("share.maxSize") ||
+      (share.reverseShare?.maxShareSize &&
+        shareSizeSum > parseInt(share.reverseShare.maxShareSize))
+    ) {
+      throw new HttpException(
+        "Max share size exceeded",
+        HttpStatus.PAYLOAD_TOO_LARGE,
+      );
+    }
+
+    // Use file.id for the S3 key to prevent collisions when uploading files with the same name
+    const key = `${this.getS3Path()}${shareId}/${file.id}`;
     const bucketName = this.config.get("s3.bucketName");
     const s3Instance = this.getS3Instance();
 
@@ -155,7 +189,7 @@ export class S3FileService {
 
     const isLastChunk = chunk.index == chunk.total - 1;
     if (isLastChunk) {
-      const fileSize: number = await this.getFileSize(shareId, file.name);
+      const fileSize: number = await this.getFileSize(shareId, file.id);
 
       await this.prisma.file.create({
         data: {
@@ -171,12 +205,17 @@ export class S3FileService {
   }
 
   async get(shareId: string, fileId: string): Promise<File> {
-    const fileName = (
-      await this.prisma.file.findUnique({ where: { id: fileId } })
-    ).name;
+    const fileMetaData = await this.prisma.file.findUnique({
+      where: { id: fileId },
+    });
+
+    if (!fileMetaData) {
+      throw new NotFoundException("File not found");
+    }
 
     const s3Instance = this.getS3Instance();
-    const key = `${this.getS3Path()}${shareId}/${fileName}`;
+    // Use file.id for the key to match create() behavior
+    const key = `${this.getS3Path()}${shareId}/${fileId}`;
     const response = await s3Instance.send(
       new GetObjectCommand({
         Bucket: this.config.get("s3.bucketName"),
@@ -188,11 +227,11 @@ export class S3FileService {
       metaData: {
         id: fileId,
         size: response.ContentLength?.toString() || "0",
-        name: fileName,
+        name: fileMetaData.name,
         shareId: shareId,
         createdAt: response.LastModified || new Date(),
         mimeType:
-          mime.contentType(fileId.split(".").pop()) ||
+          mime.contentType(fileMetaData.name.split(".").pop()) ||
           "application/octet-stream",
       },
       file: response.Body as Readable,
@@ -206,7 +245,8 @@ export class S3FileService {
 
     if (!fileMetaData) throw new NotFoundException("File not found");
 
-    const key = `${this.getS3Path()}${shareId}/${fileMetaData.name}`;
+    // Use file.id for the key to match create() behavior
+    const key = `${this.getS3Path()}${shareId}/${fileId}`;
     const s3Instance = this.getS3Instance();
 
     try {
@@ -261,8 +301,9 @@ export class S3FileService {
     }
   }
 
-  async getFileSize(shareId: string, fileName: string): Promise<number> {
-    const key = `${this.getS3Path()}${shareId}/${fileName}`;
+  async getFileSize(shareId: string, fileId: string): Promise<number> {
+    // Use file.id for the key to match create() behavior
+    const key = `${this.getS3Path()}${shareId}/${fileId}`;
     const s3Instance = this.getS3Instance();
 
     try {
@@ -304,19 +345,20 @@ export class S3FileService {
       const bucketName = this.config.get("s3.bucketName");
       const compressionLevel = this.config.get("share.zipCompressionLevel");
 
-      const prefix = `${this.getS3Path()}${shareId}/`;
-
       try {
-        const listResponse = await s3Instance.send(
-          new ListObjectsV2Command({
-            Bucket: bucketName,
-            Prefix: prefix,
-          }),
-        );
+        // Get files from database to map file IDs to actual filenames
+        const files = await this.prisma.file.findMany({
+          where: { shareId },
+        });
 
-        if (!listResponse.Contents || listResponse.Contents.length === 0) {
+        if (files.length === 0) {
           throw new NotFoundException(`No files found for share ${shareId}`);
         }
+
+        // Create a map of file ID to file name
+        const fileIdToName = new Map(
+          files.map((f) => [f.id, f.name]),
+        );
 
         const archive = archiver("zip", {
           zlib: { level: parseInt(compressionLevel) },
@@ -327,26 +369,17 @@ export class S3FileService {
           reject(new InternalServerErrorException("Error creating ZIP file"));
         });
 
-        const fileKeys = listResponse.Contents.filter(
-          (object) => object.Key && object.Key !== prefix,
-        ).map((object) => object.Key as string);
-
-        if (fileKeys.length === 0) {
-          throw new NotFoundException(
-            `No valid files found for share ${shareId}`,
-          );
-        }
-
         let filesAdded = 0;
 
         const processNextFile = async (index: number) => {
-          if (index >= fileKeys.length) {
+          if (index >= files.length) {
             archive.finalize();
             return;
           }
 
-          const key = fileKeys[index];
-          const fileName = key.replace(prefix, "");
+          const file = files[index];
+          const key = `${this.getS3Path()}${shareId}/${file.id}`;
+          const fileName = file.name;
 
           try {
             const response = await s3Instance.send(
