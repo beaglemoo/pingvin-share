@@ -63,6 +63,10 @@ export class S3FileService {
       include: { files: true, reverseShare: true },
     });
 
+    if (!share) {
+      throw new NotFoundException("Share not found");
+    }
+
     if (share.uploadLocked) {
       throw new BadRequestException("Share is already completed");
     }
@@ -214,14 +218,22 @@ export class S3FileService {
     }
 
     const s3Instance = this.getS3Instance();
-    // Use file.id for the key to match create() behavior
-    const key = `${this.getS3Path()}${shareId}/${fileId}`;
-    const response = await s3Instance.send(
-      new GetObjectCommand({
-        Bucket: this.config.get("s3.bucketName"),
-        Key: key,
-      }),
-    );
+    const bucketName = this.config.get("s3.bucketName");
+
+    // Try new key format (fileId) first, fall back to legacy format (fileName)
+    let response;
+    try {
+      const newKey = `${this.getS3Path()}${shareId}/${fileId}`;
+      response = await s3Instance.send(
+        new GetObjectCommand({ Bucket: bucketName, Key: newKey }),
+      );
+    } catch {
+      // Fallback to legacy key format (fileName) for pre-migration files
+      const legacyKey = `${this.getS3Path()}${shareId}/${fileMetaData.name}`;
+      response = await s3Instance.send(
+        new GetObjectCommand({ Bucket: bucketName, Key: legacyKey }),
+      );
+    }
 
     return {
       metaData: {
@@ -245,19 +257,25 @@ export class S3FileService {
 
     if (!fileMetaData) throw new NotFoundException("File not found");
 
-    // Use file.id for the key to match create() behavior
-    const key = `${this.getS3Path()}${shareId}/${fileId}`;
     const s3Instance = this.getS3Instance();
+    const bucketName = this.config.get("s3.bucketName");
 
+    // Try new key format (fileId) first, fall back to legacy format (fileName)
     try {
+      const newKey = `${this.getS3Path()}${shareId}/${fileId}`;
       await s3Instance.send(
-        new DeleteObjectCommand({
-          Bucket: this.config.get("s3.bucketName"),
-          Key: key,
-        }),
+        new DeleteObjectCommand({ Bucket: bucketName, Key: newKey }),
       );
-    } catch (error) {
-      throw new InternalServerErrorException("Could not delete file from S3");
+    } catch {
+      // Fallback to legacy key format (fileName) for pre-migration files
+      try {
+        const legacyKey = `${this.getS3Path()}${shareId}/${fileMetaData.name}`;
+        await s3Instance.send(
+          new DeleteObjectCommand({ Bucket: bucketName, Key: legacyKey }),
+        );
+      } catch (error) {
+        throw new InternalServerErrorException("Could not delete file from S3");
+      }
     }
 
     await this.prisma.file.delete({ where: { id: fileId } });
@@ -355,11 +373,6 @@ export class S3FileService {
           throw new NotFoundException(`No files found for share ${shareId}`);
         }
 
-        // Create a map of file ID to file name
-        const fileIdToName = new Map(
-          files.map((f) => [f.id, f.name]),
-        );
-
         const archive = archiver("zip", {
           zlib: { level: parseInt(compressionLevel) },
         });
@@ -378,36 +391,44 @@ export class S3FileService {
           }
 
           const file = files[index];
-          const key = `${this.getS3Path()}${shareId}/${file.id}`;
           const fileName = file.name;
 
+          // Try new key format (fileId) first, fall back to legacy format (fileName)
+          let response;
           try {
-            const response = await s3Instance.send(
-              new GetObjectCommand({
-                Bucket: bucketName,
-                Key: key,
-              }),
+            const newKey = `${this.getS3Path()}${shareId}/${file.id}`;
+            response = await s3Instance.send(
+              new GetObjectCommand({ Bucket: bucketName, Key: newKey }),
             );
-
-            if (response.Body instanceof Readable) {
-              const fileStream = response.Body;
-
-              fileStream.on("end", () => {
-                filesAdded++;
-                processNextFile(index + 1);
-              });
-
-              fileStream.on("error", (err) => {
-                this.logger.error(`Error streaming file ${fileName}`, err);
-                processNextFile(index + 1);
-              });
-
-              archive.append(fileStream, { name: fileName });
-            } else {
+          } catch {
+            // Fallback to legacy key format (fileName) for pre-migration files
+            try {
+              const legacyKey = `${this.getS3Path()}${shareId}/${fileName}`;
+              response = await s3Instance.send(
+                new GetObjectCommand({ Bucket: bucketName, Key: legacyKey }),
+              );
+            } catch (error) {
+              this.logger.error(`Error processing file ${fileName}`, error);
               processNextFile(index + 1);
+              return;
             }
-          } catch (error) {
-            this.logger.error(`Error processing file ${fileName}`, error);
+          }
+
+          if (response.Body instanceof Readable) {
+            const fileStream = response.Body;
+
+            fileStream.on("end", () => {
+              filesAdded++;
+              processNextFile(index + 1);
+            });
+
+            fileStream.on("error", (err) => {
+              this.logger.error(`Error streaming file ${fileName}`, err);
+              processNextFile(index + 1);
+            });
+
+            archive.append(fileStream, { name: fileName });
+          } else {
             processNextFile(index + 1);
           }
         };
