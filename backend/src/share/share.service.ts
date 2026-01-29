@@ -353,7 +353,7 @@ export class ShareService {
   async increaseViewCount(share: Share) {
     await this.prisma.share.update({
       where: { id: share.id },
-      data: { views: share.views + 1 },
+      data: { views: { increment: 1 } },
     });
   }
 
@@ -437,7 +437,7 @@ export class ShareService {
     }
   }
 
-  async getLinkShare(id: string): Promise<{ linkUrl: string; views: number }> {
+  async getLinkShare(id: string, shareToken?: string): Promise<{ linkUrl: string; views: number }> {
     const share = await this.prisma.share.findUnique({
       where: { id },
       include: { security: true },
@@ -456,6 +456,22 @@ export class ShareService {
       throw new NotFoundException("Link has expired");
     }
 
+    // Check password protection
+    if (share.security?.password) {
+      if (!shareToken) {
+        throw new ForbiddenException(
+          "This share is password protected",
+          "share_password_required",
+        );
+      }
+      if (!(await this.verifyShareToken(id, shareToken))) {
+        throw new ForbiddenException(
+          "Share token required",
+          "share_token_required",
+        );
+      }
+    }
+
     // Check max views
     if (share.security?.maxViews && share.views >= share.security.maxViews) {
       throw new NotFoundException("Maximum views exceeded");
@@ -470,7 +486,7 @@ export class ShareService {
     };
   }
 
-  async getPasteShare(id: string): Promise<{
+  async getPasteShare(id: string, shareToken?: string): Promise<{
     id: string;
     name: string | null;
     description: string | null;
@@ -496,6 +512,22 @@ export class ShareService {
     // Check expiration
     if (!dayjs(share.expiration).isSame(0) && dayjs().isAfter(share.expiration)) {
       throw new NotFoundException("Paste has expired");
+    }
+
+    // Check password protection
+    if (share.security?.password) {
+      if (!shareToken) {
+        throw new ForbiddenException(
+          "This share is password protected",
+          "share_password_required",
+        );
+      }
+      if (!(await this.verifyShareToken(id, shareToken))) {
+        throw new ForbiddenException(
+          "Share token required",
+          "share_token_required",
+        );
+      }
     }
 
     // Check max views
