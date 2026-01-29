@@ -12,14 +12,18 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { useClipboard } from "@mantine/hooks";
+import { useModals } from "@mantine/modals";
 import dayjs from "dayjs";
 import { GetServerSidePropsContext } from "next";
 import { useEffect, useState } from "react";
 import { TbCopy, TbDownload, TbExternalLink } from "react-icons/tb";
 import { FormattedMessage } from "react-intl";
 import Meta from "../../components/Meta";
+import showEnterPasswordModal from "../../components/share/showEnterPasswordModal";
+import showErrorModal from "../../components/share/showErrorModal";
 import useTranslate from "../../hooks/useTranslate.hook";
 import api from "../../services/api.service";
+import shareService from "../../services/share.service";
 import toast from "../../utils/toast.util";
 
 type PasteData = {
@@ -43,12 +47,36 @@ const PasteView = ({ pasteId }: { pasteId: string }) => {
   const t = useTranslate();
   const theme = useMantineTheme();
   const clipboard = useClipboard();
+  const modals = useModals();
 
   const [paste, setPaste] = useState<PasteData | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const getShareToken = async (password?: string) => {
+    await shareService
+      .getShareToken(pasteId, password)
+      .then(() => {
+        modals.closeAll();
+        getPaste();
+      })
+      .catch((e) => {
+        const { error } = e.response?.data || {};
+        if (error == "share_max_views_exceeded") {
+          showErrorModal(
+            modals,
+            t("share.error.visitor-limit-exceeded.title"),
+            t("share.error.visitor-limit-exceeded.description"),
+            "go-home",
+          );
+        } else if (error == "share_password_required") {
+          showEnterPasswordModal(modals, getShareToken);
+        } else {
+          toast.axiosError(e);
+        }
+      });
+  };
+
+  const getPaste = async () => {
     api
       .get(`/p/${pasteId}`)
       .then((res) => {
@@ -56,9 +84,41 @@ const PasteView = ({ pasteId }: { pasteId: string }) => {
         setLoading(false);
       })
       .catch((e) => {
-        setError(e.response?.data?.message || t("common.error.unknown"));
+        const { error } = e.response?.data || {};
+        if (e.response?.status == 404) {
+          if (error == "share_removed") {
+            showErrorModal(
+              modals,
+              t("share.error.removed.title"),
+              e.response.data.message,
+              "go-home",
+            );
+          } else {
+            showErrorModal(
+              modals,
+              t("paste.view.error"),
+              t("paste.view.not-found"),
+              "go-home",
+            );
+          }
+        } else if (error == "share_password_required") {
+          showEnterPasswordModal(modals, getShareToken);
+        } else if (error == "share_token_required") {
+          getShareToken();
+        } else {
+          showErrorModal(
+            modals,
+            t("common.error"),
+            e.response?.data?.message || t("common.error.unknown"),
+            "go-home",
+          );
+        }
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    getPaste();
   }, [pasteId]);
 
   const copyContent = () => {
@@ -87,7 +147,7 @@ const PasteView = ({ pasteId }: { pasteId: string }) => {
     URL.revokeObjectURL(url);
   };
 
-  if (loading) {
+  if (loading && !paste) {
     return (
       <>
         <Meta title={t("paste.view.loading")} />
@@ -98,16 +158,10 @@ const PasteView = ({ pasteId }: { pasteId: string }) => {
     );
   }
 
-  if (error || !paste) {
+  if (!paste) {
     return (
       <>
-        <Meta title={t("paste.view.error")} />
-        <Stack align="center" spacing="md" mt="xl">
-          <Title order={3}>
-            <FormattedMessage id="paste.view.error" />
-          </Title>
-          <Text color="dimmed">{error || t("paste.view.not-found")}</Text>
-        </Stack>
+        <Meta title={t("paste.view.title", { id: pasteId })} />
       </>
     );
   }
