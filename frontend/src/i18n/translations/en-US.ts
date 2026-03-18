@@ -812,7 +812,7 @@ export default {
   "paste.action.copy": "Copy content",
   "paste.action.download": "Download",
   "paste.action.raw": "View raw",
-  "navbar.links.paste": "Paste",
+  "navbar.links.paste": "Paste Bin",
 
   // UI States
   "share.table.empty": "No files in this share",
