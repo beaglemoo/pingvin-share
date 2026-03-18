@@ -32,7 +32,7 @@ const Footer = () => {
           {t("common.text.powered-by")}{" "}
           <Anchor
             size="xs"
-            href="https://github.com/stonith404/pingvin-share"
+            href="https://github.com/beaglemoo/pingvin-share"
             target="_blank"
           >
             Pingvin Share
