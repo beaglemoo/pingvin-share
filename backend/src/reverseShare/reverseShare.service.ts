@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import dayjs, { ManipulateType } from "dayjs";
+import * as dayjs from "dayjs";
+import { ManipulateType } from "dayjs";
 import { ConfigService } from "src/config/config.service";
 import { FileService } from "src/file/file.service";
 import { PrismaService } from "src/prisma/prisma.service";

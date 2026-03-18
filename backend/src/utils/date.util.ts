@@ -1,4 +1,5 @@
-import dayjs, { ManipulateType } from "dayjs";
+import * as dayjs from "dayjs";
+import { ManipulateType } from "dayjs";
 
 export function parseRelativeDateToAbsolute(relativeDate: string) {
   if (relativeDate == "never") return dayjs(0).toDate();
