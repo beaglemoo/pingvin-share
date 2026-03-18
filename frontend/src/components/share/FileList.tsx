@@ -38,7 +38,7 @@ const FileList = memo(function FileList({
 }: {
   files?: FileMetaData[];
   setShare: Dispatch<SetStateAction<Share | undefined>>;
-  share: Share;
+  share?: Share;
   isLoading: boolean;
 }) {
   const clipboard = useClipboard();
@@ -80,6 +80,7 @@ const FileList = memo(function FileList({
 
   const copyFileLink = useCallback(
     (file: FileMetaData) => {
+      if (!share) return;
       const link = `${window.location.origin}/api/shares/${share.id}/files/${file.id}`;
 
       if (window.isSecureContext) {
@@ -96,7 +97,7 @@ const FileList = memo(function FileList({
         });
       }
     },
-    [share.id, clipboard, modals, t],
+    [share?.id, clipboard, modals, t],
   );
 
   useEffect(sortFiles, [sort, sortFiles]);
@@ -146,14 +147,14 @@ const FileList = memo(function FileList({
                         <ActionIcon
                           aria-label={t("share.button.preview")}
                           onClick={() =>
-                            showFilePreviewModal(share.id, file, modals)
+                            showFilePreviewModal(share?.id ?? "", file, modals)
                           }
                           size={25}
                         >
                           <TbEye />
                         </ActionIcon>
                       )}
-                      {!share.hasPassword && (
+                      {!share?.hasPassword && (
                         <ActionIcon
                           aria-label={t("common.button.copy-link")}
                           size={25}
@@ -166,7 +167,7 @@ const FileList = memo(function FileList({
                         aria-label={t("share.button.download")}
                         size={25}
                         onClick={async () => {
-                          await shareService.downloadFile(share.id, file.id);
+                          await shareService.downloadFile(share?.id ?? "", file.id);
                         }}
                       >
                         <TbDownload />

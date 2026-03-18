@@ -87,6 +87,10 @@ export class JobsService {
   deleteTemporaryFiles() {
     let filesDeleted = 0;
 
+    if (!fs.existsSync(SHARE_DIRECTORY)) {
+      return;
+    }
+
     const shareDirectories = fs
       .readdirSync(SHARE_DIRECTORY, { withFileTypes: true })
       .filter((dirent) => dirent.isDirectory())
