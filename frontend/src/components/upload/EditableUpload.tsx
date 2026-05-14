@@ -14,6 +14,7 @@ import { FileListItem, FileMetaData, FileUpload } from "../../types/File.type";
 import toast from "../../utils/toast.util";
 
 const promiseLimit = pLimit(3);
+const MAX_UPLOAD_RETRIES = 3;
 let errorToastShown = false;
 
 const EditableUpload = ({
@@ -66,6 +67,7 @@ const EditableUpload = ({
       // Limit the number of concurrent uploads to 3
       promiseLimit(async () => {
         let fileId: string | undefined;
+        let retries = 0;
 
         const setFileProgress = (progress: number) => {
           setUploadingFiles((files) =>
@@ -116,6 +118,8 @@ const EditableUpload = ({
               continue;
             } else {
               setFileProgress(-1);
+              retries++;
+              if (retries >= MAX_UPLOAD_RETRIES) break;
               // Retry after 5 seconds
               await new Promise((resolve) => setTimeout(resolve, 5000));
               chunkIndex = -1;
