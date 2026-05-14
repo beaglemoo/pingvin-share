@@ -21,6 +21,7 @@ import toast from "../../utils/toast.util";
 import { useRouter } from "next/router";
 
 const promiseLimit = pLimit(3);
+const MAX_UPLOAD_RETRIES = 3;
 let errorToastShown = false;
 let createdShare: Share;
 
@@ -68,6 +69,7 @@ const Upload = ({
       // Limit the number of concurrent uploads to 3
       promiseLimit(async () => {
         let fileId;
+        let retries = 0;
 
         const setFileProgress = (progress: number) => {
           setFiles((files) =>
@@ -118,6 +120,8 @@ const Upload = ({
               continue;
             } else {
               setFileProgress(-1);
+              retries++;
+              if (retries >= MAX_UPLOAD_RETRIES) break;
               // Retry after 5 seconds
               await new Promise((resolve) => setTimeout(resolve, 5000));
               chunkIndex = -1;
